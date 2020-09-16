@@ -6,7 +6,7 @@ final class TapTests: XCTestCase {
     func testInit() {
         let number = Tap<Int, Never>(initialValue: 0) {
             Future { promise in
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
                     promise(.success(42))
                 }
             }
@@ -14,27 +14,27 @@ final class TapTests: XCTestCase {
         
         let expectation = XCTestExpectation()
         
-        var cancellables: [AnyCancellable] = []
-        number.objectWillChange.sink { _ in
+        let cancellable = number.objectWillChange.sink { _ in
             expectation.fulfill()
-        }.store(in: &cancellables)
+        }
         
         XCTAssertEqual(number.get(), 0)
         number.isOn = true
         wait(for: [expectation], timeout: 3.0)
         XCTAssertEqual(number.get(), 42)
         number.isOn = false
+        cancellable.cancel()
     }
     
     func testPublisher() {
         let number = Tap<Int, Never>(initialValue: 0) { () -> AnyPublisher<Int, Never> in
             let subject: PassthroughSubject<Int, Never> = .init()
             
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
                 subject.send(2)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
                     subject.send(3)
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
                         subject.send(5)
                     }
                 }
@@ -45,9 +45,8 @@ final class TapTests: XCTestCase {
         
         let expectation = XCTestExpectation()
         
-        var cancellables: [AnyCancellable] = []
         var count = 0
-        number.objectWillChange.sink { _ in
+        let cancellable = number.objectWillChange.sink { _ in
             switch count {
             case 0:
                 XCTAssertEqual(number.get(), 0)
@@ -69,19 +68,20 @@ final class TapTests: XCTestCase {
                 XCTFail()
             }
             count += 1
-        }.store(in: &cancellables)
+        }
         
         XCTAssertEqual(number.get(), 0)
         number.isOn = true
         wait(for: [expectation], timeout: 3.0)
         XCTAssertEqual(count, 3)
         number.isOn = false
+        cancellable.cancel()
     }
     
     func testFailure() {
         let number = Tap<Int, GeneralError>(initialValue: 0) {
             Future { promise in
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
                     promise(.failure(GeneralError(message: "Message")))
                 }
             }
@@ -89,10 +89,9 @@ final class TapTests: XCTestCase {
         
         let expectation = XCTestExpectation()
         
-        var cancellables: [AnyCancellable] = []
-        number.objectWillChange.sink { _ in
+        let cancellable = number.objectWillChange.sink { _ in
             expectation.fulfill()
-        }.store(in: &cancellables)
+        }
 
         switch number.value {
         case .success(let value):
@@ -109,12 +108,13 @@ final class TapTests: XCTestCase {
             XCTAssertEqual(error.message, "Message")
         }
         number.isOn = false
+        cancellable.cancel()
     }
     
     func testInitOptional() {
         let number = Tap<Int?, Never> {
             Future { promise in
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
                     promise(.success(42))
                 }
             }
@@ -122,22 +122,22 @@ final class TapTests: XCTestCase {
         
         let expectation = XCTestExpectation()
         
-        var cancellables: [AnyCancellable] = []
-        number.objectWillChange.sink { _ in
+        let cancellable = number.objectWillChange.sink { _ in
             expectation.fulfill()
-        }.store(in: &cancellables)
+        }
         
         XCTAssertEqual(number.get(), nil)
         number.isOn = true
         wait(for: [expectation], timeout: 3.0)
         XCTAssertEqual(number.get(), 42)
         number.isOn = false
+        cancellable.cancel()
     }
     
     func testInitArray() {
         let number = Tap<[Int], Never> {
             Future { promise in
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
                     promise(.success([42]))
                 }
             }
@@ -145,22 +145,22 @@ final class TapTests: XCTestCase {
         
         let expectation = XCTestExpectation()
         
-        var cancellables: [AnyCancellable] = []
-        number.objectWillChange.sink { _ in
+        let cancellable = number.objectWillChange.sink { _ in
             expectation.fulfill()
-        }.store(in: &cancellables)
+        }
         
         XCTAssertEqual(number.get(), [])
         number.isOn = true
         wait(for: [expectation], timeout: 3.0)
         XCTAssertEqual(number.get(), [42])
         number.isOn = false
+        cancellable.cancel()
     }
     
     func testInitSet() {
         let number = Tap<Set<Int>, Never> {
             Future { promise in
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
                     promise(.success([42]))
                 }
             }
@@ -168,22 +168,22 @@ final class TapTests: XCTestCase {
         
         let expectation = XCTestExpectation()
         
-        var cancellables: [AnyCancellable] = []
-        number.objectWillChange.sink { _ in
+        let cancellable = number.objectWillChange.sink { _ in
             expectation.fulfill()
-        }.store(in: &cancellables)
+        }
         
         XCTAssertEqual(number.get(), [])
         number.isOn = true
         wait(for: [expectation], timeout: 3.0)
         XCTAssertEqual(number.get(), [42])
         number.isOn = false
+        cancellable.cancel()
     }
     
     func testInitDictionary() {
         let number = Tap<[String: Int], Never> {
             Future { promise in
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
                     promise(.success(["A": 42]))
                 }
             }
@@ -191,16 +191,16 @@ final class TapTests: XCTestCase {
         
         let expectation = XCTestExpectation()
         
-        var cancellables: [AnyCancellable] = []
-        number.objectWillChange.sink { _ in
+        let cancellable = number.objectWillChange.sink { _ in
             expectation.fulfill()
-        }.store(in: &cancellables)
+        }
         
         XCTAssertEqual(number.get(), [:])
         number.isOn = true
         wait(for: [expectation], timeout: 3.0)
         XCTAssertEqual(number.get(), ["A": 42])
         number.isOn = false
+        cancellable.cancel()
     }
 }
 
