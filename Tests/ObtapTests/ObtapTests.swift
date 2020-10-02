@@ -11,7 +11,7 @@ import Combine
 import Obtap
 
 struct UserList: View {
-    private var users: Tap<[User], Never> = .init {
+    private var users: Tap<[User]> = .init {
         Future<[User], Never> { promise in
             fetchUsers { (users: Result<[User], Error>) in
                 promise(users.flatMapError { _ in .success([]) })
@@ -20,7 +20,7 @@ struct UserList: View {
     }
     
     var body: some View {
-        let users: [User] = self.users.get()
+        let users: [User] = self.users.value
         return List(users) { user in
             Text(user.name)
         }
