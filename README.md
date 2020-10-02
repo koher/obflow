@@ -1,4 +1,4 @@
-# Obtap
+# Obtap :potable_water:
 
 _Obtap_ provides the `Tap` type which works like a water tap for publishers. The `Tap` type is especially useful when it is combined with SwiftUI.
 
