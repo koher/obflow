@@ -15,13 +15,13 @@ extension TapTests {
     //   `swift test --generate-linuxmain`
     // to regenerate.
     static let __allTests__TapTests = [
-        ("testFailure", testFailure),
         ("testInit", testInit),
         ("testInitArray", testInitArray),
         ("testInitDictionary", testInitDictionary),
         ("testInitOptional", testInitOptional),
         ("testInitSet", testInitSet),
         ("testPublisher", testPublisher),
+        ("testSetOn", testSetOn),
     ]
 }
 

@@ -21,20 +21,26 @@ public final class Tap<Value>: ObservableObject {
             defer { lock.unlock() }
             
             if newValue {
-                guard cancellable == nil else { return }
-                cancellable = publisher()
-                    .sink { [weak self] value in
-                        guard let self = self else { return }
-                        self.lock.lock()
-                        defer { self.lock.unlock() }
-                        self.value = value
-                    }
+                setOn { _ in }
             } else {
                 guard let cancellable = self.cancellable else { return }
                 cancellable.cancel()
                 self.cancellable = nil
             }
         }
+    }
+    
+    public func setOn(_ body: @escaping (Value) -> Void) {
+        guard cancellable == nil else { return }
+        body(value)
+        cancellable = publisher()
+            .sink { [weak self] value in
+                guard let self = self else { return }
+                self.lock.lock()
+                defer { self.lock.unlock() }
+                self.value = value
+                body(value)
+            }
     }
 }
 
