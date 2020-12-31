@@ -8,7 +8,7 @@ import Combine
 import Obtap
 
 struct UserList: View {
-    private var users: Tap<[User]> = .init {
+    @StateObject private var users: Tap<[User]> = .init {
         Future<[User], Never> { promise in
             fetchUsers { (users: Result<[User], Error>) in
                 promise(users.flatMapError { _ in .success([]) })
