@@ -65,27 +65,19 @@ extension Tap {
         self.init(initialValue: .success(nil), publisher: publisher)
     }
     
-    public convenience init<Element, P: Publisher>(publisher: @escaping () -> P) where Value == [Element], P.Output == Value, P.Failure == Never {
+    public convenience init<P: Publisher>(publisher: @escaping () -> P) where Value: ExpressibleByArrayLiteral, P.Output == Value, P.Failure == Never {
         self.init(initialValue: [], publisher: publisher)
     }
     
-    public convenience init<Element, P: Publisher>(publisher: @escaping () -> P) where Value == Result<P.Output, P.Failure>, P.Output == [Element] {
+    public convenience init<P: Publisher>(publisher: @escaping () -> P) where Value == Result<P.Output, P.Failure>, P.Output: ExpressibleByArrayLiteral {
         self.init(initialValue: .success([]), publisher: publisher)
     }
     
-    public convenience init<Element, P: Publisher>(publisher: @escaping () -> P) where Value == Set<Element>, P.Output == Value, P.Failure == Never {
-        self.init(initialValue: [], publisher: publisher)
-    }
-    
-    public convenience init<Element, P: Publisher>(publisher: @escaping () -> P) where Value == Result<P.Output, P.Failure>, P.Output == Set<Element> {
-        self.init(initialValue: .success([]), publisher: publisher)
-    }
-    
-    public convenience init<K: Hashable, V, P: Publisher>(publisher: @escaping () -> P) where Value == [K: V], P.Output == Value, P.Failure == Never {
+    public convenience init<P: Publisher>(publisher: @escaping () -> P) where Value: ExpressibleByDictionaryLiteral, P.Output == Value, P.Failure == Never {
         self.init(initialValue: [:], publisher: publisher)
     }
     
-    public convenience init<K: Hashable, V, P: Publisher>(publisher: @escaping () -> P)  where Value == Result<P.Output, P.Failure>, P.Output == [K: V] {
+    public convenience init<P: Publisher>(publisher: @escaping () -> P)  where Value == Result<P.Output, P.Failure>, P.Output: ExpressibleByDictionaryLiteral {
         self.init(initialValue: .success([:]), publisher: publisher)
     }
 }
