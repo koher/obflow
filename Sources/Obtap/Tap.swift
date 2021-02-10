@@ -14,6 +14,16 @@ public final class Tap<Value>: ObservableObject {
         self.publisher = { publisher().eraseToAnyPublisher() }
     }
     
+    public init<P: Publisher>(initialValue: Value, publisher: @escaping () -> P) where Value == Result<P.Output, P.Failure> {
+        self.value = initialValue
+        self.publisher = {
+            publisher()
+                .map { Value.success($0) }
+                .catch { Just(Value.failure($0)) }
+                .eraseToAnyPublisher()
+        }
+    }
+    
     public var isOn: Bool {
         get { cancellable != nil }
         set {
@@ -51,15 +61,31 @@ extension Tap {
         self.init(initialValue: nil, publisher: publisher)
     }
     
+    public convenience init<Wrapped, P: Publisher>(publisher: @escaping () -> P) where Value == Result<P.Output, P.Failure>, P.Output == Wrapped? {
+        self.init(initialValue: .success(nil), publisher: publisher)
+    }
+    
     public convenience init<Element, P: Publisher>(publisher: @escaping () -> P) where Value == [Element], P.Output == Value, P.Failure == Never {
         self.init(initialValue: [], publisher: publisher)
+    }
+    
+    public convenience init<Element, P: Publisher>(publisher: @escaping () -> P) where Value == Result<P.Output, P.Failure>, P.Output == [Element] {
+        self.init(initialValue: .success([]), publisher: publisher)
     }
     
     public convenience init<Element, P: Publisher>(publisher: @escaping () -> P) where Value == Set<Element>, P.Output == Value, P.Failure == Never {
         self.init(initialValue: [], publisher: publisher)
     }
     
+    public convenience init<Element, P: Publisher>(publisher: @escaping () -> P) where Value == Result<P.Output, P.Failure>, P.Output == Set<Element> {
+        self.init(initialValue: .success([]), publisher: publisher)
+    }
+    
     public convenience init<K: Hashable, V, P: Publisher>(publisher: @escaping () -> P) where Value == [K: V], P.Output == Value, P.Failure == Never {
         self.init(initialValue: [:], publisher: publisher)
+    }
+    
+    public convenience init<K: Hashable, V, P: Publisher>(publisher: @escaping () -> P)  where Value == Result<P.Output, P.Failure>, P.Output == [K: V] {
+        self.init(initialValue: .success([:]), publisher: publisher)
     }
 }
